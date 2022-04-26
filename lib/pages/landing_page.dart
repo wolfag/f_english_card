@@ -1,3 +1,4 @@
+import 'package:f_english_card/pages/home_page.dart';
 import 'package:f_english_card/values/app_colors.dart';
 import 'package:f_english_card/values/app_styles.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,15 @@ class LandingPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 72),
                 child: RawMaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HomePage(),
+                      ),
+                      (route) => false,
+                    );
+                  },
                   shape: CircleBorder(),
                   fillColor: AppColors.lightBlue,
                   child: Icon(
