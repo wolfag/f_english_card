@@ -1,6 +1,16 @@
+import 'dart:math';
+
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:english_words/english_words.dart';
+import 'package:f_english_card/models/english_today.dart';
+import 'package:f_english_card/pages/all_words_page.dart';
+import 'package:f_english_card/pages/control_page.dart';
 import 'package:f_english_card/values/app_colors.dart';
 import 'package:f_english_card/values/app_styles.dart';
+import 'package:f_english_card/values/share_keys.dart';
+import 'package:f_english_card/widgets/app_button.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -11,13 +21,53 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   late PageController _pageController;
+
+  List<EnglishToday> words = [];
+
+  List<int> fixedListRandom({int len = 1, int max = 120, int min = 1}) {
+    if (len > max || len < min) {
+      return [];
+    }
+    List<int> newList = [];
+
+    Random random = Random();
+    int count = 1;
+    while (count <= len) {
+      int val = random.nextInt(max);
+      if (newList.contains(val)) {
+        continue;
+      } else {
+        newList.add(val);
+        count++;
+      }
+    }
+    return newList;
+  }
+
+  getEnglishToday() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    int count = preferences.getInt(ShareKeys.counter) ?? 5;
+    List<String> newList = [];
+    List<int> rans = fixedListRandom(len: count, max: nouns.length);
+
+    rans.forEach((item) {
+      newList.add(nouns[item]);
+    });
+
+    setState(() {
+      words = newList.map((e) => EnglishToday(noun: e)).toList();
+    });
+  }
 
   @override
   void initState() {
     _pageController = PageController(viewportFraction: 0.9);
-
     super.initState();
+    getEnglishToday();
   }
 
   @override
@@ -25,6 +75,7 @@ class _HomePageState extends State<HomePage> {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.second,
       appBar: AppBar(
         actions: [],
@@ -36,7 +87,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         leading: InkWell(
-          onTap: () {},
+          onTap: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
           child: const Icon(
             Icons.menu,
             color: Colors.black,
@@ -71,6 +124,9 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
                 itemBuilder: (context, index) {
+                  String firstLetter = words[index].noun?.substring(0, 1) ?? '';
+                  String remainLetter = words[index].noun?.substring(1) ?? '';
+
                   return Padding(
                     padding:
                         const EdgeInsets.only(left: 8, right: 8, bottom: 16),
@@ -104,11 +160,11 @@ class _HomePageState extends State<HomePage> {
                             overflow: TextOverflow.fade,
                             textAlign: TextAlign.start,
                             text: TextSpan(
-                              text: 'B',
+                              text: firstLetter,
                               style: AppStyles.h3.copyWith(
                                 fontSize: 89,
                                 fontWeight: FontWeight.bold,
-                                shadows: [
+                                shadows: const [
                                   BoxShadow(
                                     color: Colors.black38,
                                     offset: Offset(3, 6),
@@ -118,11 +174,11 @@ class _HomePageState extends State<HomePage> {
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'eautiful',
+                                  text: remainLetter,
                                   style: AppStyles.h3.copyWith(
                                     fontSize: 56,
                                     fontWeight: FontWeight.bold,
-                                    shadows: [
+                                    shadows: const [
                                       BoxShadow(
                                         color: Colors.black38,
                                         offset: Offset(0, 0),
@@ -135,12 +191,13 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 24),
-                            child: Text(
+                            child: AutoSizeText(
                               'Think of all the beauty still left around you and be happy.',
                               style: AppStyles.h4.copyWith(
                                 letterSpacing: 1,
                                 color: Colors.black,
                               ),
+                              maxLines: 2,
                             ),
                           ),
                         ],
@@ -148,41 +205,90 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 },
-                itemCount: 5,
+                itemCount: words.length,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Container(
-                height: 8,
-                alignment: Alignment.center,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                child: ListView.builder(
-                  itemCount: 5,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return buildIndicator(index == _currentIndex, size);
-                  },
-                ),
-              ),
-            ),
+            _currentIndex >= 0
+                ? buildShowMore()
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Container(
+                      height: 8,
+                      alignment: Alignment.center,
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      child: ListView.builder(
+                        itemCount: 5,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return buildIndicator(index == _currentIndex, size);
+                        },
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          getEnglishToday();
+        },
         backgroundColor: AppColors.primary,
         child: const Icon(
           Icons.refresh,
           color: Colors.black,
         ),
       ),
+      drawer: Drawer(
+        child: Container(
+          color: AppColors.lightBlue,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 24, left: 16),
+                child: Text(
+                  'You mind',
+                  style: AppStyles.h3.copyWith(
+                    color: AppColors.text,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: AppButton(
+                  label: 'Favorite',
+                  onTap: () {
+                    print('ok');
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: AppButton(
+                  label: 'Your control',
+                  onTap: () {
+                    _scaffoldKey.currentState?.openEndDrawer();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ControlPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget buildIndicator(bool isActive, Size size) {
-    return Container(
+    return AnimatedContainer(
+      duration: Duration(microseconds: 300),
       height: 8,
+      curve: Curves.bounceInOut,
       width: isActive ? size.width * 1 / 5 : 24,
       margin: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -195,6 +301,37 @@ class _HomePageState extends State<HomePage> {
             blurRadius: 3,
           )
         ],
+      ),
+    );
+  }
+
+  Widget buildShowMore() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      alignment: Alignment.centerLeft,
+      child: Material(
+        color: AppColors.primary,
+        elevation: 4,
+        borderRadius: BorderRadius.all(Radius.circular(24)),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AllWordsPage(words: words),
+              ),
+            );
+          },
+          splashColor: Colors.black38,
+          borderRadius: BorderRadius.all(Radius.circular(24)),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Text(
+              'Show more',
+              style: AppStyles.h5,
+            ),
+          ),
+        ),
       ),
     );
   }
