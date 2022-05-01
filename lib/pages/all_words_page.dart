@@ -41,24 +41,36 @@ class AllWordsPage extends StatelessWidget {
           crossAxisSpacing: 8,
           children: words
               .map(
-                (e) => Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: AutoSizeText(
-                    e.noun ?? '',
-                    style: AppStyles.h3.copyWith(shadows: [
-                      BoxShadow(
-                        color: Colors.black38,
-                        offset: Offset(3, 6),
-                        blurRadius: 6,
+                (e) => Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
-                    ]),
-                    maxLines: 1,
-                    overflow: TextOverflow.fade,
-                  ),
+                      child: AutoSizeText(
+                        e.noun ?? '',
+                        style: AppStyles.h3.copyWith(shadows: [
+                          BoxShadow(
+                            color: Colors.black38,
+                            offset: Offset(3, 6),
+                            blurRadius: 6,
+                          ),
+                        ]),
+                        maxLines: 1,
+                        overflow: TextOverflow.fade,
+                      ),
+                    ),
+                    Positioned(
+                      child: Icon(
+                        Icons.thumb_up,
+                        color: e.isFavorite ? Colors.red : Colors.white,
+                      ),
+                      top: 10,
+                      right: 10,
+                    ),
+                  ],
                 ),
               )
               .toList(),

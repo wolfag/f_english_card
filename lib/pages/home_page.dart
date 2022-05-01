@@ -123,6 +123,7 @@ class _HomePageState extends State<HomePage> {
                     _currentIndex = index;
                   });
                 },
+                itemCount: min(words.length, 6),
                 itemBuilder: (context, index) {
                   String firstLetter = words[index].noun?.substring(0, 1) ?? '';
                   String remainLetter = words[index].noun?.substring(1) ?? '';
@@ -130,101 +131,127 @@ class _HomePageState extends State<HomePage> {
                   return Padding(
                     padding:
                         const EdgeInsets.only(left: 8, right: 8, bottom: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(24),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(3, 6),
-                            blurRadius: 6,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            alignment: Alignment.centerRight,
-                            child: const Icon(
-                              Icons.thumb_up,
-                              color: Colors.white,
-                            ),
-                          ),
-                          RichText(
-                            maxLines: 1,
-                            overflow: TextOverflow.fade,
-                            textAlign: TextAlign.start,
-                            text: TextSpan(
-                              text: firstLetter,
-                              style: AppStyles.h3.copyWith(
-                                fontSize: 89,
-                                fontWeight: FontWeight.bold,
-                                shadows: const [
-                                  BoxShadow(
-                                    color: Colors.black38,
-                                    offset: Offset(3, 6),
-                                    blurRadius: 6,
-                                  )
-                                ],
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: remainLetter,
-                                  style: AppStyles.h3.copyWith(
-                                    fontSize: 56,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      BoxShadow(
-                                        color: Colors.black38,
-                                        offset: Offset(0, 0),
+                    child: Material(
+                      borderRadius: BorderRadius.all(Radius.circular(24)),
+                      color: AppColors.primary,
+                      elevation: 4,
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        onDoubleTap: () {
+                          setState(() {
+                            words[index].isFavorite = !words[index].isFavorite;
+                          });
+                        },
+                        borderRadius: BorderRadius.all(Radius.circular(24)),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          child: index > 4
+                              ? InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            AllWordsPage(words: words),
                                       ),
-                                    ],
+                                    );
+                                  },
+                                  child: Center(
+                                    child: Text(
+                                      'Show more',
+                                      style: AppStyles.h3.copyWith(
+                                        shadows: [
+                                          BoxShadow(
+                                            color: Colors.black38,
+                                            offset: Offset(3, 6),
+                                            blurRadius: 6,
+                                          )
+                                        ],
+                                      ),
+                                    ),
                                   ),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      alignment: Alignment.centerRight,
+                                      child: Icon(
+                                        Icons.thumb_up,
+                                        color: words[index].isFavorite
+                                            ? Colors.red
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                    RichText(
+                                      maxLines: 1,
+                                      overflow: TextOverflow.fade,
+                                      textAlign: TextAlign.start,
+                                      text: TextSpan(
+                                        text: firstLetter,
+                                        style: AppStyles.h3.copyWith(
+                                          fontSize: 89,
+                                          fontWeight: FontWeight.bold,
+                                          shadows: const [
+                                            BoxShadow(
+                                              color: Colors.black38,
+                                              offset: Offset(3, 6),
+                                              blurRadius: 6,
+                                            )
+                                          ],
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: remainLetter,
+                                            style: AppStyles.h3.copyWith(
+                                              fontSize: 56,
+                                              fontWeight: FontWeight.bold,
+                                              shadows: const [
+                                                BoxShadow(
+                                                  color: Colors.black38,
+                                                  offset: Offset(0, 0),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 24),
+                                      child: AutoSizeText(
+                                        'Think of all the beauty still left around you and be happy.',
+                                        style: AppStyles.h4.copyWith(
+                                          letterSpacing: 1,
+                                          color: Colors.black,
+                                        ),
+                                        maxLines: 2,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 24),
-                            child: AutoSizeText(
-                              'Think of all the beauty still left around you and be happy.',
-                              style: AppStyles.h4.copyWith(
-                                letterSpacing: 1,
-                                color: Colors.black,
-                              ),
-                              maxLines: 2,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   );
                 },
-                itemCount: words.length,
               ),
             ),
-            _currentIndex >= 0
-                ? buildShowMore()
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Container(
-                      height: 8,
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.symmetric(vertical: 12),
-                      child: ListView.builder(
-                        itemCount: 5,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return buildIndicator(index == _currentIndex, size);
-                        },
-                      ),
-                    ),
-                  ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Container(
+                height: 8,
+                alignment: Alignment.center,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                child: ListView.builder(
+                  itemCount: 5,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return buildIndicator(index == _currentIndex, size);
+                  },
+                ),
+              ),
+            )
           ],
         ),
       ),
