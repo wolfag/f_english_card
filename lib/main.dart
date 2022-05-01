@@ -1,5 +1,6 @@
 import 'package:f_english_card/pages/home_page.dart';
 import 'package:f_english_card/pages/landing_page.dart';
+import 'package:f_english_card/widgets/app_scroll_behavior.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      scrollBehavior: AppScrollBehavior(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
