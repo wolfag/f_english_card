@@ -313,7 +313,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildIndicator(bool isActive, Size size) {
     return AnimatedContainer(
-      duration: Duration(microseconds: 300),
+      duration: Duration(milliseconds: 300),
       height: 8,
       curve: Curves.bounceInOut,
       width: isActive ? size.width * 1 / 5 : 24,
